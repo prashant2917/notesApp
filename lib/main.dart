@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:notesapp/database/DatabaseHelper.dart';
+
+import 'model/Note.dart';
 
 void main() => runApp(MyApp());
+DatabaseHelper databaseHelper;
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
+    databaseHelper=new DatabaseHelper();
+    databaseHelper.createDatabase();
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -44,6 +51,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class ShowDialogState extends State{
+  final noteController = TextEditingController();
   @override
   Widget build(BuildContext context) {
 
@@ -60,10 +68,18 @@ class ShowDialogState extends State{
     );
   }
 
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    noteController.dispose();
+    super.dispose();
+  }
+
   showAddNoteDialog() {
     AlertDialog dialog = AlertDialog(
         title: Text("Add Note"),
         content:  TextField(
+            controller: noteController,
             minLines: 10,
             maxLines: 15,
             autocorrect: false,
@@ -89,7 +105,7 @@ class ShowDialogState extends State{
       ),
       FlatButton(
         child: Text("Add"),
-        onPressed: cancelPop,
+        onPressed: addToDatabase,
       )
     ],
     );
@@ -97,7 +113,22 @@ class ShowDialogState extends State{
     showDialog(context: context, builder: (BuildContext context) => dialog);
   }
 
+  addToDatabase(){
+   print("call add to database");
+    cancelPop();
+    if(databaseHelper!=null) {
+      var note= new Note(note:noteController.text);
+      databaseHelper.createNote(note);
+
+    }
+
+  }
+
   cancelPop(){
+    if(noteController!=null) {
+      noteController.clear();
+
+    }
     Navigator.of(context).pop();
   }
 

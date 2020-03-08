@@ -27,11 +27,19 @@ class DatabaseHelper {
     return result;
   }
 
-  Future<List> getNotes() async {
-    var result = await database.query(Constants.NOTE_TABLE_NAME,
-        columns: [Constants.COLUMN_ID, Constants.COLUMN_NOTE]);
+  Future<List<Note>> getNotes() async {
+   if(database!=null) {
+     var maps = await database.query(Constants.NOTE_TABLE_NAME,
+         columns: [Constants.COLUMN_ID, Constants.COLUMN_NOTE]);
+     return List.generate(maps.length, (i) {
+       return Note(
+         id: maps[i][Constants.COLUMN_ID],
+         note: maps[i][Constants.COLUMN_NOTE],
 
-    return result.toList();
+       );
+     });
+   }
+
   }
 
   Future<Note> getCustomer(Note note) async {

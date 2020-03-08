@@ -11,53 +11,50 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    databaseHelper=new DatabaseHelper();
+    databaseHelper = new DatabaseHelper();
     databaseHelper.createDatabase();
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-
         primarySwatch: Colors.teal,
       ),
-     // home: MyHomePage(title: 'Notes App'),
-    home:MyHomePage(title: 'notes App'),
+      // home: MyHomePage(title: 'Notes App'),
+      home: MyHomePage(title: 'notes App'),
       //home:GreenFrog(),
     );
   }
 }
+
 class GreenFrog extends StatelessWidget {
-  const GreenFrog({ Key key }) : super(key: key);
+  const GreenFrog({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(color: const Color(0xFF2DBD3A));
   }
 }
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
-
   final String title;
 
-
-
-
   @override
- ShowDialogState createState() {
-   return ShowDialogState();
-
+  ShowDialogState createState() {
+    return ShowDialogState();
   }
-
 }
 
-class ShowDialogState extends State{
-  final noteController = TextEditingController();
+class ShowDialogState extends State {
+  TextEditingController noteController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    getAllNotes();
 
     return Scaffold(
       appBar: AppBar(
-
         title: Text("Notes App"),
       ),
 
@@ -76,66 +73,69 @@ class ShowDialogState extends State{
   }
 
   showAddNoteDialog() {
-    AlertDialog dialog = AlertDialog(
-        title: Text("Add Note"),
-        content:  TextField(
-            controller: noteController,
-            minLines: 10,
-            maxLines: 15,
-            autocorrect: false,
-            decoration: InputDecoration(
-              hintText: 'Write your note here',
-              filled: true,
-              fillColor: Colors.white,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                borderSide: BorderSide(color: Colors.grey),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                borderSide: BorderSide(color: Colors.grey),
-              ),
-            )
 
+    AlertDialog dialog = AlertDialog(
+      title: Text("Add Note"),
+      content: TextField(
+          controller: noteController,
+          minLines: 10,
+          maxLines: 15,
+          autocorrect: false,
+          decoration: InputDecoration(
+            hintText: 'Write your note here',
+            filled: true,
+            fillColor: Colors.white,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(5.0)),
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(5.0)),
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+          )),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("Close"),
+          onPressed: cancelPop,
         ),
-    actions: <Widget>[
-      FlatButton(
-        child: Text("Close"),
-        onPressed:cancelPop,
-      ),
-      FlatButton(
-        child: Text("Add"),
-        onPressed: addToDatabase,
-      )
-    ],
+        FlatButton(
+          child: Text("Add"),
+          onPressed: addToDatabase,
+        )
+      ],
     );
 
     showDialog(context: context, builder: (BuildContext context) => dialog);
   }
 
-  addToDatabase(){
-   print("call add to database");
-    cancelPop();
-    if(databaseHelper!=null) {
-      var note= new Note(note:noteController.text);
+  addToDatabase() {
+    print("call add to database");
+
+    if (databaseHelper != null) {
+      print('note is ${noteController.text}');
+      Note note = new Note(note: noteController.text);
       databaseHelper.createNote(note);
-
     }
-
+    cancelPop();
   }
 
-  cancelPop(){
-    if(noteController!=null) {
+  cancelPop() {
+    if (noteController != null) {
       noteController.clear();
-
     }
     Navigator.of(context).pop();
   }
 
+  getAllNotes() async {
+    print("in getAllNotes ");
+
+    List<Note> noteList = await databaseHelper.getNotes();
+    if (noteList != null) {
+      for (var value in noteList) {
+        print('note id is ${value.id} and note is ${value.note}');
+      }
+    }
+
+  }
 }
-
-
-
-
-
-

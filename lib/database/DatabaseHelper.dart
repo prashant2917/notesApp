@@ -28,10 +28,11 @@ class DatabaseHelper {
   }
 
   Future<List<Note>> getNotes() async {
-   if(database!=null) {
+   List<Note> noteList=List();
+    if(database!=null) {
      var maps = await database.query(Constants.NOTE_TABLE_NAME,
          columns: [Constants.COLUMN_ID, Constants.COLUMN_NOTE]);
-     return List.generate(maps.length, (i) {
+      noteList=List.generate(maps.length, (i) {
        return Note(
          id: maps[i][Constants.COLUMN_ID],
          note: maps[i][Constants.COLUMN_NOTE],
@@ -39,6 +40,8 @@ class DatabaseHelper {
        );
      });
    }
+
+    return noteList;
 
   }
 

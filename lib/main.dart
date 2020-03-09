@@ -6,6 +6,7 @@ import 'model/Note.dart';
 void main() => runApp(MyApp());
 DatabaseHelper databaseHelper;
 
+
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
 
@@ -16,24 +17,18 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.teal,
       ),
       // home: MyHomePage(title: 'Notes App'),
       home: MyHomePage(title: 'notes App'),
-      //home:GreenFrog(),
+
     );
   }
 }
 
-class GreenFrog extends StatelessWidget {
-  const GreenFrog({Key key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(color: const Color(0xFF2DBD3A));
-  }
-}
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -51,13 +46,12 @@ class ShowDialogState extends State {
 
   @override
   Widget build(BuildContext context) {
-    getAllNotes();
-
     return Scaffold(
       appBar: AppBar(
         title: Text("Notes App"),
-      ),
 
+      ),
+      body: notesListView(context),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: showAddNoteDialog,
@@ -70,6 +64,30 @@ class ShowDialogState extends State {
     // Clean up the controller when the widget is disposed.
     noteController.dispose();
     super.dispose();
+  }
+
+  Widget notesListView(BuildContext context) {
+    return FutureBuilder<List<Note>>(
+    future: getAllNotes(),
+      builder: (BuildContext context, AsyncSnapshot<List<Note>> snapshot) {
+         // ignore: missing_return, missing_return
+
+         if(snapshot.hasData){
+           return ListView.builder(itemCount: snapshot.data.length,
+           itemBuilder: (BuildContext context, int index) {
+             Note item = snapshot.data[index];
+             return ListTile(
+                 title: Text(item.note),
+             );
+           },
+       );
+         }
+         else if (snapshot.hasError) return ErrorWidget(snapshot.error);
+         else{
+           return Center(child: Text("No notes available"));
+         }
+      }
+  );
   }
 
   showAddNoteDialog() {
@@ -116,6 +134,10 @@ class ShowDialogState extends State {
       print('note is ${noteController.text}');
       Note note = new Note(note: noteController.text);
       databaseHelper.createNote(note);
+      setState(() {
+
+        notesListView(context);
+      });
     }
     cancelPop();
   }
@@ -127,15 +149,29 @@ class ShowDialogState extends State {
     Navigator.of(context).pop();
   }
 
-  getAllNotes() async {
+ Future<List<Note>> getAllNotes() async {
     print("in getAllNotes ");
+    List<Note> noteList=List();
+  if(databaseHelper!=null) {
+    print("database helper is not  null");
+     noteList = await databaseHelper.getNotes();
 
-    List<Note> noteList = await databaseHelper.getNotes();
     if (noteList != null) {
+      print("note list is not  null");
       for (var value in noteList) {
         print('note id is ${value.id} and note is ${value.note}');
       }
-    }
 
+
+    }
+    else{
+      print("note list is null");
+    }
+  }
+  else{
+    print("database helper is null");
+  }
+
+  return noteList;
   }
 }
